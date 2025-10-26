@@ -13,6 +13,8 @@ import Production from "./pages/Production";
 import Distillery from "./pages/Distillery";
 import PowerPlant from "./pages/PowerPlant";
 import Sustainability from "./pages/Sustainability";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,8 +44,8 @@ const App = () => {
                   <Route path="/distillery" element={<Distillery />} />
                   <Route path="/power" element={<PowerPlant />} />
                   <Route path="/sustainability" element={<Sustainability />} />
-                  <Route path="/analytics" element={<Overview />} />
-                  <Route path="/settings" element={<Overview />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
