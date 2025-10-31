@@ -11,6 +11,7 @@ import {
   BarChart3,
   Settings,
   ChevronLeft,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ interface SidebarProps {
 
 const navigation = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
+  { name: "Register Farmer", href: "/register-farmer", icon: UserPlus },
   { name: "Farmers", href: "/farmers", icon: Users },
   { name: "Logistics", href: "/logistics", icon: Truck },
   { name: "Production", href: "/production", icon: Factory },

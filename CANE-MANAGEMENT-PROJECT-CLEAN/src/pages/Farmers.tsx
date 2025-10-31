@@ -22,6 +22,19 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchFarmerPayments, fetchYieldForecast } from "@/data/mock-api";
 import { useState } from "react";
 
+interface RegisteredFarmer {
+  _id: string;
+  digitalFarmerId: string;
+  name: string;
+  mobileNumber: string;
+  email?: string;
+  areaInAcres?: number;
+  landLocation?: string;
+  blockchainVerified: boolean;
+  blockchainWalletAddress?: string;
+  blockchainTransactionHash?: string;
+}
+
 const farmers = [
   {
     id: "F-2847",
@@ -70,6 +83,24 @@ const farmers = [
   },
 ];
 
+// Fetch registered farmers from backend
+const fetchRegisteredFarmers = async () => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const response = await fetch(`${API_BASE_URL}/farmers`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+    credentials: 'include',
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch farmers');
+  }
+  
+  return response.json();
+};
+
 export default function Farmers() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -86,6 +117,14 @@ export default function Farmers() {
     queryFn: fetchYieldForecast,
     staleTime: 5000,
     refetchInterval: 5000,
+  });
+
+  // Fetch registered farmers with auto-refresh
+  const { data: registeredFarmers, isLoading: farmersLoading } = useQuery({
+    queryKey: ['registeredFarmers'],
+    queryFn: fetchRegisteredFarmers,
+    staleTime: 3000,
+    refetchInterval: 3000, // Auto-refresh every 3 seconds
   });
 
   const filteredPayments = payments?.filter(payment => {
@@ -157,6 +196,83 @@ export default function Farmers() {
           variant="success"
         />
       </div>
+
+      {/* Registered Farmers Section */}
+      <DashboardCard title="Registered Farmers with Blockchain Verification">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Farmers registered with Digital ID and blockchain verification
+            </p>
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/register-farmer'}>
+              <Users className="h-4 w-4 mr-2" />
+              Register New Farmer
+            </Button>
+          </div>
+
+          <div className="rounded-lg border border-border overflow-hidden">
+            {farmersLoading ? (
+              <div className="p-8 text-center animate-pulse">Loading registered farmers...</div>
+            ) : registeredFarmers && registeredFarmers.farmers && registeredFarmers.farmers.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="font-semibold">Digital ID</TableHead>
+                    <TableHead className="font-semibold">Name</TableHead>
+                    <TableHead className="font-semibold">Mobile</TableHead>
+                    <TableHead className="font-semibold">Land Area</TableHead>
+                    <TableHead className="font-semibold">Location</TableHead>
+                    <TableHead className="font-semibold">Blockchain</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {registeredFarmers.farmers.map((farmer: RegisteredFarmer) => (
+                    <TableRow key={farmer._id} className="border-border">
+                      <TableCell className="font-mono text-primary font-medium">
+                        {farmer.digitalFarmerId}
+                      </TableCell>
+                      <TableCell className="font-medium">{farmer.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{farmer.mobileNumber}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {farmer.areaInAcres ? `${farmer.areaInAcres} acres` : 'N/A'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {farmer.landLocation || 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        {farmer.blockchainVerified ? (
+                          <Badge className="bg-success/20 text-success border-success/40">
+                            <Shield className="h-3 w-3 mr-1" />
+                            Verified
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="border-warning text-warning">
+                            Pending
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-primary/20 text-primary border-primary/40">
+                          Active
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="p-8 text-center">
+                <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-4">No farmers registered yet</p>
+                <Button onClick={() => window.location.href = '/register-farmer'}>
+                  Register First Farmer
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </DashboardCard>
 
       <DashboardCard title="Farmer Payment Ledger">
         <div className="space-y-4">
