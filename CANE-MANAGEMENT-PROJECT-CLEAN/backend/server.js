@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
 // Import routes
+import authRoutes from './routes/auth.js';
 import productionRoutes from './routes/production.js';
 import farmerRoutes from './routes/farmers.js';
 import logisticsRoutes from './routes/logistics.js';
@@ -33,6 +34,7 @@ app.use(compression());
 // CORS configuration - allow multiple origins
 const allowedOrigins = [
   'http://localhost:8080',
+  'http://localhost:5173',  // Vite dev server
   'http://10.21.144.241:8080',
   'http://127.0.0.1:8080'
 ];
@@ -63,6 +65,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/production', productionRoutes);
 app.use('/api/farmers', farmerRoutes);
 app.use('/api/logistics', logisticsRoutes);
