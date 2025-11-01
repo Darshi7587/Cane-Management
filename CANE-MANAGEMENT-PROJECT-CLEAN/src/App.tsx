@@ -12,7 +12,14 @@ import AdminLogin from "./pages/AdminLogin";
 import StaffLogin from "./pages/StaffLogin";
 import FarmerRegistration from "./pages/FarmerRegistration";
 import LogisticsRegistration from "./pages/LogisticsRegistration";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import ClearStorage from "./pages/ClearStorage";
+import AdminDashboard from "./pages/admin/EnhancedAdminDashboard";
+import FarmerDashboard from "./pages/farmer/FarmerDashboard";
+import LogisticsDashboard from "./pages/logistics/LogisticsDashboard";
+import ProductionDashboard from "./pages/staff/EnhancedProductionDashboard";
+import QualityDashboard from "./pages/staff/EnhancedQualityDashboard";
+import HRDashboard from "./pages/staff/EnhancedHRDashboard";
+import SupportDashboard from "./pages/staff/EnhancedSupportDashboard";
 import Overview from "./pages/Overview";
 import Farmers from "./pages/Farmers";
 import Logistics from "./pages/Logistics";
@@ -35,11 +42,13 @@ const AppLayout = () => {
   const publicRoutes = ['/', '/login', '/admin-login', '/staff-login', '/register-farmer', '/register-logistics'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
   
-  // Admin dashboard and staff dashboards should not show the regular sidebar
+  // Admin, farmer, logistics, and staff dashboards should not show the regular sidebar
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isFarmerRoute = location.pathname.startsWith('/farmer');
+  const isLogisticsRoute = location.pathname.startsWith('/logistics/dashboard');
   const isStaffRoute = location.pathname.startsWith('/staff');
   
-  const shouldShowSidebar = !isPublicRoute && !isAdminRoute && !isStaffRoute;
+  const shouldShowSidebar = !isPublicRoute && !isAdminRoute && !isFarmerRoute && !isLogisticsRoute && !isStaffRoute;
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,15 +69,22 @@ const AppLayout = () => {
             <Route path="/staff-login" element={<StaffLogin />} />
             <Route path="/register-farmer" element={<FarmerRegistration />} />
             <Route path="/register-logistics" element={<LogisticsRegistration />} />
+            <Route path="/clear-storage" element={<ClearStorage />} />
             
             {/* Admin Routes (no sidebar) */}
             <Route path="/admin" element={<AdminDashboard />} />
             
-            {/* Staff Routes (no sidebar) - to be created */}
-            <Route path="/staff/production" element={<div className="p-8"><h1 className="text-3xl font-bold">Production Dashboard</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
-            <Route path="/staff/quality" element={<div className="p-8"><h1 className="text-3xl font-bold">Quality Control Dashboard</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
-            <Route path="/staff/hr" element={<div className="p-8"><h1 className="text-3xl font-bold">HR Dashboard</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
-            <Route path="/staff/support" element={<div className="p-8"><h1 className="text-3xl font-bold">Support Dashboard</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
+            {/* Farmer Routes (no sidebar) */}
+            <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
+            
+            {/* Logistics Routes (no sidebar) */}
+            <Route path="/logistics/dashboard" element={<LogisticsDashboard />} />
+            
+            {/* Staff Routes (no sidebar) */}
+            <Route path="/staff/production" element={<ProductionDashboard />} />
+            <Route path="/staff/quality" element={<QualityDashboard />} />
+            <Route path="/staff/hr" element={<HRDashboard />} />
+            <Route path="/staff/support" element={<SupportDashboard />} />
             
             {/* Dashboard Routes (with sidebar) */}
             <Route path="/overview" element={<Overview />} />

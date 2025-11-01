@@ -14,6 +14,8 @@ import distilleryRoutes from './routes/distillery.js';
 import powerPlantRoutes from './routes/powerPlant.js';
 import sustainabilityRoutes from './routes/sustainability.js';
 import analyticsRoutes from './routes/analytics.js';
+import adminRoutes from './routes/admin.js';
+import staffRoutes from './routes/staff.js';
 
 dotenv.config();
 
@@ -73,6 +75,8 @@ app.use('/api/distillery', distilleryRoutes);
 app.use('/api/power', powerPlantRoutes);
 app.use('/api/sustainability', sustainabilityRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/staff', staffRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

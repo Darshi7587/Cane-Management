@@ -109,14 +109,9 @@ async function createTestUsers() {
           continue;
         }
 
-        // Hash password
-        const passwordHash = await bcrypt.hash(userData.password, 12);
-
-        // Create user
+        // Create user (password will be hashed by User model pre-save hook)
         const user = await User.create({
-          ...userData,
-          passwordHash,
-          password: undefined // Remove plain password
+          ...userData
         });
 
         console.log(`✅ Created ${userData.role}: ${userData.email}`);

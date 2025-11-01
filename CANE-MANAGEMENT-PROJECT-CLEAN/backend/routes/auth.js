@@ -116,22 +116,34 @@ router.post(
   '/login',
   [
     body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-    body('password').notEmpty().withMessage('Password is required')
+    body('password').notEmpty().withMessage('Password is required'),
+    body('role').optional().isIn(['farmer', 'logistics', 'admin', 'staff']).withMessage('Invalid role'),
+    body('department').optional().isString().withMessage('Invalid department')
   ],
   handleValidationErrors,
   async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, role, department } = req.body;
+
+      console.log('🔐 Login attempt:', { email, role, department });
 
       // Find user with password field
       const user = await User.findOne({ email }).select('+password');
 
       if (!user) {
+        console.log('❌ User not found:', email);
         return res.status(401).json({
           success: false,
           message: 'Invalid email or password'
         });
       }
+
+      console.log('✅ User found:', { 
+        email: user.email, 
+        role: user.role, 
+        status: user.status,
+        hasPassword: !!user.password 
+      });
 
       // Check if account is locked
       if (user.isLocked) {
@@ -141,10 +153,31 @@ router.post(
         });
       }
 
+      // Verify role if provided
+      if (role && user.role !== role) {
+        return res.status(401).json({
+          success: false,
+          message: `Invalid credentials for ${role} login. Please use the correct login page.`,
+          code: 'ROLE_MISMATCH'
+        });
+      }
+
+      // Verify department for staff if provided
+      if (department && user.role === 'staff' && user.department !== department) {
+        return res.status(401).json({
+          success: false,
+          message: 'Department mismatch. Please select your assigned department.',
+          code: 'DEPARTMENT_MISMATCH'
+        });
+      }
+
       // Verify password
+      console.log('🔑 Comparing password...');
       const isPasswordValid = await user.comparePassword(password);
+      console.log('🔑 Password valid:', isPasswordValid);
 
       if (!isPasswordValid) {
+        console.log('❌ Invalid password for:', email);
         await user.incrementLoginAttempts();
         return res.status(401).json({
           success: false,
@@ -182,7 +215,9 @@ router.post(
       await user.resetLoginAttempts();
 
       // Generate tokens
+      console.log('🎫 Generating tokens for user:', user._id);
       const { accessToken, refreshToken } = generateTokenPair(user);
+      console.log('✅ Access token generated:', accessToken.substring(0, 50) + '...');
 
       // Save refresh token
       user.refreshToken = refreshToken;
@@ -199,6 +234,8 @@ router.post(
       res.json({
         success: true,
         message: 'Login successful',
+        accessToken,
+        refreshToken,
         user: {
           id: user._id,
           name: user.name,
@@ -209,10 +246,6 @@ router.post(
           isEmailVerified: user.isEmailVerified,
           profilePhoto: user.profilePhoto,
           profileData
-        },
-        tokens: {
-          accessToken,
-          refreshToken
         }
       });
     } catch (error) {

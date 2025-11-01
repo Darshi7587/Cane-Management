@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
   // Department (for staff only)
   department: {
     type: String,
-    enum: ['production', 'quality-control', 'hr', 'support', null],
+    enum: ['production', 'quality', 'hr', 'support', null],
     default: null
   },
   

@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 
-// JWT Secret Keys (In production, use environment variables)
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-2024';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key-change-in-production-2024';
+// Helper functions to get secrets at runtime (after dotenv is loaded)
+const getJwtSecret = () => process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-2024';
+const getJwtRefreshSecret = () => process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key-change-in-production-2024';
 
 // Token expiry times
 const ACCESS_TOKEN_EXPIRY = '15m'; // 15 minutes
@@ -14,20 +14,27 @@ const REFRESH_TOKEN_EXPIRY = '7d'; // 7 days
  * @returns {String} JWT access token
  */
 export const generateAccessToken = (payload) => {
-  return jwt.sign(
+  const secret = getJwtSecret();
+  console.log('🔐 generateAccessToken - Using JWT_SECRET:', secret);
+  console.log('📝 generateAccessToken - Payload:', payload);
+  
+  const token = jwt.sign(
     {
       userId: payload.userId,
       email: payload.email,
       role: payload.role,
       department: payload.department || null
     },
-    JWT_SECRET,
+    secret,
     { 
       expiresIn: ACCESS_TOKEN_EXPIRY,
       issuer: 'ssimp-cane-management',
       audience: 'ssimp-users'
     }
   );
+  
+  console.log('✅ generateAccessToken - Token created:', token.substring(0, 50) + '...');
+  return token;
 };
 
 /**
@@ -41,7 +48,7 @@ export const generateRefreshToken = (payload) => {
       userId: payload.userId,
       email: payload.email
     },
-    JWT_REFRESH_SECRET,
+    getJwtRefreshSecret(),
     { 
       expiresIn: REFRESH_TOKEN_EXPIRY,
       issuer: 'ssimp-cane-management',
@@ -57,7 +64,7 @@ export const generateRefreshToken = (payload) => {
  */
 export const verifyAccessToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET, {
+    return jwt.verify(token, getJwtSecret(), {
       issuer: 'ssimp-cane-management',
       audience: 'ssimp-users'
     });
@@ -73,7 +80,7 @@ export const verifyAccessToken = (token) => {
  */
 export const verifyRefreshToken = (token) => {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET, {
+    return jwt.verify(token, getJwtRefreshSecret(), {
       issuer: 'ssimp-cane-management',
       audience: 'ssimp-users'
     });
